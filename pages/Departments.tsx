@@ -126,14 +126,22 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
     );
 
     if (isAlreadyLeading) {
-      alert(`Validation Error: ${formData.head} is already leading another department. Each unit must have a unique lead.`);
+      onAddNotification({
+        title: 'Validation Error',
+        desc: `❌ ${formData.head} is already leading another department. Each unit must have a unique lead.`,
+        type: 'error'
+      });
       return;
     }
 
     // Validation: Lead must be a member of the department
     const leadUser = users.find(u => u.fullName === formData.head);
     if (!leadUser || leadUser.department !== formData.name) {
-      alert(`Validation Error: ${formData.head} must be a member of the ${formData.name} department to be its lead.`);
+      onAddNotification({
+        title: 'Validation Error',
+        desc: `❌ ${formData.head} must be a member of the ${formData.name} department to be its lead.`,
+        type: 'error'
+      });
       return;
     }
 
@@ -141,8 +149,31 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
 
     try {
       if (editingDept) {
+        // Update existing department
+        const token = localStorage.getItem('smart_leave_token');
+        const response = await fetch(`/api/departments/${editingDept.id}`, {
+          method: 'PUT',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify({...formData}),
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to update department');
+        }
+
         setDepartments(prev => prev.map(d => d.id === editingDept.id ? { ...d, ...formData } : d));
+
+        onAddNotification({
+          title: 'Success',
+          desc: `✓ Department "${formData.name}" has been updated successfully.`,
+          type: 'success'
+        });
       } else {
+        // Create new department
         const newDept: Department = {
           id: Math.random().toString(36).substr(2, 9),
           ...formData,
@@ -157,9 +188,19 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
           },
           body: JSON.stringify(newDept),
         });
-        if (response.ok) {
-          setDepartments(prev => [newDept, ...prev]);
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.message || 'Failed to create department');
         }
+
+        setDepartments(prev => [newDept, ...prev]);
+
+        onAddNotification({
+          title: 'Success',
+          desc: `✓ New department "${formData.name}" has been created successfully.`,
+          type: 'success'
+        });
       }
 
       setIsSaving(false);
@@ -171,6 +212,14 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
       }, 1500);
     } catch (err) {
       console.error('Failed to save department:', err);
+      const errorMsg = err instanceof Error ? err.message : 'An error occurred. Please try again.';
+      
+      onAddNotification({
+        title: 'Error',
+        desc: `❌ ${errorMsg}`,
+        type: 'error'
+      });
+
       setIsSaving(false);
     }
   };

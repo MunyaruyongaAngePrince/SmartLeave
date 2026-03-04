@@ -642,6 +642,13 @@ async function startServer() {
     }
 
     try {
+      // Check if the person is already leading another department
+      const [existingDepts] = await db.query('SELECT id, name FROM departments WHERE head = ?', [head]);
+      if ((existingDepts as any[]).length > 0) {
+        const otherDept = (existingDepts as any[])[0];
+        return sendError(res, 409, `Validation failed: ${head} is already leading the "${otherDept.name}" department. Each person can only lead one department.`, 'DUPLICATE_DEPARTMENT_HEAD');
+      }
+
       await db.query(
         'INSERT INTO departments (id, name, head, status) VALUES (?, ?, ?, ?)',
         [id, name, head, status || 'Active']
@@ -650,6 +657,42 @@ async function startServer() {
       res.json({ success: true, message: 'Department created successfully.' });
     } catch (error) {
       const { message, code, status } = handleDbError(error, 'Create department');
+      sendError(res, status, message, code);
+    }
+  });
+
+  app.put('/api/departments/:id', async (req, res) => {
+    const { id } = req.params;
+    const { name, head, status } = req.body;
+
+    // Validation
+    if (!name || !head) {
+      return sendError(res, 400, 'Department name and head are required.', 'MISSING_FIELD');
+    }
+
+    try {
+      // Get the current department to check if head is being changed
+      const [currentDepts] = await db.query('SELECT head FROM departments WHERE id = ?', [id]);
+      const currentDept = (currentDepts as any[])[0];
+
+      if (!currentDept) {
+        return sendError(res, 404, 'Department not found.', 'DEPARTMENT_NOT_FOUND');
+      }
+
+      // Only check for duplicate if the head is being changed
+      if (head !== currentDept.head) {
+        const [existingDepts] = await db.query('SELECT id, name FROM departments WHERE head = ? AND id != ?', [head, id]);
+        if ((existingDepts as any[]).length > 0) {
+          const otherDept = (existingDepts as any[])[0];
+          return sendError(res, 409, `Validation failed: ${head} is already leading the "${otherDept.name}" department. Each person can only lead one department.`, 'DUPLICATE_DEPARTMENT_HEAD');
+        }
+      }
+
+      await db.query('UPDATE departments SET name = ?, head = ?, status = ? WHERE id = ?', [name, head, status, id]);
+      console.log(`[DEPT] Department updated: ${name}`);
+      res.json({ success: true, message: 'Department updated successfully.' });
+    } catch (error) {
+      const { message, code, status } = handleDbError(error, 'Update department');
       sendError(res, status, message, code);
     }
   });

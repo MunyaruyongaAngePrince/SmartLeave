@@ -30,20 +30,40 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
     return day > 0 && day <= daysInMonth ? day : null;
   });
 
-  const monthHolidays = holidays.filter(h => {
-    const d = new Date(h.date);
-    return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
-  });
+  const monthHolidays = useMemo(() => {
+    // Deduplicate holidays by date (keep first occurrence)
+    const seenDates = new Set<string>();
+    const uniqueHolidays = holidays.filter(h => {
+      const dateStr = new Date(h.date).toISOString().split('T')[0];
+      if (seenDates.has(dateStr)) return false;
+      seenDates.add(dateStr);
+      return true;
+    });
+
+    return uniqueHolidays.filter(h => {
+      const d = new Date(h.date);
+      return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
+    });
+  }, [holidays, viewMonth, viewYear]);
 
   const categorizedHolidays = useMemo(() => {
     const now = new Date();
     const currentYear = now.getFullYear();
     const todayStart = new Date().setHours(0,0,0,0);
 
-    const upcoming = holidays.filter(h => new Date(h.date).getTime() >= todayStart)
+    // Deduplicate holidays by date (keep first occurrence)
+    const seenDates = new Set<string>();
+    const uniqueHolidays = holidays.filter(h => {
+      const dateStr = new Date(h.date).toISOString().split('T')[0];
+      if (seenDates.has(dateStr)) return false;
+      seenDates.add(dateStr);
+      return true;
+    });
+
+    const upcoming = uniqueHolidays.filter(h => new Date(h.date).getTime() >= todayStart)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
     
-    const past = holidays.filter(h => {
+    const past = uniqueHolidays.filter(h => {
       const d = new Date(h.date);
       return d.getTime() < todayStart && d.getFullYear() === currentYear;
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());

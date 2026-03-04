@@ -144,7 +144,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({ leaves, encashments, us
     const today = new Date();
     today.setHours(0, 0, 0, 0);
 
-    return holidays
+    // Deduplicate holidays by date (keep first occurrence)
+    const seenDates = new Set<string>();
+    const uniqueHolidays = holidays.filter(h => {
+      const dateStr = new Date(h.date).toISOString().split('T')[0];
+      if (seenDates.has(dateStr)) return false;
+      seenDates.add(dateStr);
+      return true;
+    });
+
+    return uniqueHolidays
       .filter(h => new Date(h.date) >= today)
       .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
       .slice(0, 3);

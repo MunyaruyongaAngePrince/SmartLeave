@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
 interface MiniCalendarProps {
@@ -22,10 +22,21 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ holidays, approvedLeaves = 
     return day > 0 && day <= daysInMonth ? day : null;
   });
 
-  const monthHolidays = holidays.filter(h => {
-    const d = new Date(h.date);
-    return d.getMonth() === month && d.getFullYear() === year;
-  });
+  const monthHolidays = useMemo(() => {
+    // Deduplicate holidays by date (keep first occurrence)
+    const seenDates = new Set<string>();
+    const uniqueHolidays = holidays.filter((h: any) => {
+      const dateStr = new Date(h.date).toISOString().split('T')[0];
+      if (seenDates.has(dateStr)) return false;
+      seenDates.add(dateStr);
+      return true;
+    });
+
+    return uniqueHolidays.filter(h => {
+      const d = new Date(h.date);
+      return d.getMonth() === month && d.getFullYear() === year;
+    });
+  }, [holidays, month, year]);
 
   const monthLeaves = approvedLeaves.filter(l => {
     const start = new Date(l.startDate);

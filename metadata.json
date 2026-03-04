@@ -1,0 +1,7 @@
+{
+  "name": "SmartLeave - Advanced Leave Management System",
+  "description": "A comprehensive leave management platform for employees and HR managers, featuring real-time tracking, encashment requests, and automated reporting.",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}

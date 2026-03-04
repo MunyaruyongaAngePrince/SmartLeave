@@ -496,27 +496,44 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
               <form onSubmit={handleAssignLeave} className="space-y-6">
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-xs font-black uppercase text-gray-400 mb-2">Employee</label>
-                    <select 
-                      required 
-                      value={assignForm.employeeId}
-                      onChange={(e) => setAssignForm({...assignForm, employeeId: e.target.value})}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all dark:text-white text-sm font-semibold appearance-none" 
-                    >
-                      <option value="all">All Staff</option>
-                      {departmentUsers.map(u => <option key={u.id} value={u.id}>{u.fullName}</option>)}
-                    </select>
+                    <label className="block text-xs font-black uppercase text-gray-400 mb-2">Department</label>
+                    <div className="relative group">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none z-10">
+                        <Building2 size={18} />
+                      </span>
+                      <select 
+                        required 
+                        value={assignForm.employeeId}
+                        onChange={(e) => setAssignForm({...assignForm, employeeId: e.target.value})}
+                        className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm font-semibold appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors" 
+                      >
+                        <option value="all">All Staff</option>
+                        {departmentUsers.map(u => <option key={u.id} value={u.id}>{u.fullName}</option>)}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                   <div>
                     <label className="block text-xs font-black uppercase text-gray-400 mb-2">Category</label>
-                    <select 
-                      required 
-                      value={assignForm.category}
-                      onChange={(e) => setAssignForm({...assignForm, category: e.target.value as LeaveCategory})}
-                      className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all dark:text-white text-sm font-semibold appearance-none" 
-                    >
-                      {Object.values(LeaveCategory).map(cat => <option key={cat} value={cat}>{cat}</option>)}
-                    </select>
+                    <div className="relative group">
+                      <select 
+                        required 
+                        value={assignForm.category}
+                        onChange={(e) => setAssignForm({...assignForm, category: e.target.value as LeaveCategory})}
+                        className="w-full px-4 py-3 pr-10 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none focus:ring-2 focus:ring-indigo-500 dark:text-white text-sm font-semibold appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors" 
+                      >
+                        {Object.values(LeaveCategory).map(cat => <option key={cat} value={cat}>{cat}</option>)}
+                      </select>
+                      <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                        </svg>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 
@@ -684,19 +701,24 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
               </div>
               <div>
                 <label className="block text-xs font-black uppercase text-gray-400 mb-2">Department Lead</label>
-                <div className="relative">
-                  <Crown className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+                <div className="relative group">
+                  <Crown className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none z-10" size={18} />
                   <select 
                     required 
                     value={formData.head} 
                     onChange={(e) => setFormData({...formData, head: e.target.value})} 
-                    className="w-full pl-10 pr-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl outline-none font-semibold dark:text-white border border-transparent focus:border-indigo-500 appearance-none"
+                    className="w-full pl-10 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none font-semibold dark:text-white focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     <option value="">Select a lead from {formData.name}...</option>
                     {users.filter(u => u.department === formData.name).map(u => (
                       <option key={u.id} value={u.fullName}>{u.fullName}</option>
                     ))}
                   </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
                 </div>
                 {users.filter(u => u.department === formData.name).length === 0 && (
                   <p className="text-[10px] text-red-500 mt-1 font-bold">No personnel found in {formData.name} department yet.</p>
@@ -704,10 +726,21 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
               </div>
               <div>
                 <label className="block text-xs font-black uppercase text-gray-400 mb-2">Status</label>
-                <select value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value as 'Active' | 'Inactive'})} className="w-full px-4 py-3 bg-gray-50 dark:bg-gray-900 rounded-xl outline-none font-semibold">
-                  <option value="Active">Active</option>
-                  <option value="Inactive">Inactive</option>
-                </select>
+                <div className="relative group">
+                  <select 
+                    value={formData.status} 
+                    onChange={(e) => setFormData({...formData, status: e.target.value as 'Active' | 'Inactive'})} 
+                    className="w-full px-4 pr-10 py-3 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl outline-none font-semibold dark:text-white focus:ring-2 focus:ring-indigo-500 appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
+                  >
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                  </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
+                </div>
               </div>
               <div className="flex gap-3">
                 <button type="button" onClick={() => setIsModalOpen(false)} className="flex-1 py-4 bg-gray-100 text-gray-600 rounded-2xl text-sm font-bold">Cancel</button>

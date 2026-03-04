@@ -33,33 +33,51 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
     e.preventDefault();
     setError('');
     
+    // Form validation
     if (formData.password !== formData.confirmPassword) {
-      setError('Passwords do not match');
+      setError('❌ Passwords do not match. Please ensure both password fields are identical.');
       return;
     }
 
     if (formData.password.length < 6) {
-      setError('Password must be at least 6 characters');
+      setError('❌ Password must be at least 6 characters long. Please make it stronger.');
+      return;
+    }
+
+    if (!formData.fullName.trim()) {
+      setError('❌ Full name is required. Please enter your complete name.');
       return;
     }
 
     // Email validation
     const emailRegex = /^[^\s@]+@[^\s@]+\.com$/;
     if (!emailRegex.test(formData.email)) {
-      setError('Please enter a valid email address ending with .com (e.g., name@company.com)');
+      setError('❌ Invalid email format. Please use a valid corporate email (e.g., john.doe@company.com).');
+      return;
+    }
+
+    // Check if email already exists
+    if (users.some(u => u.email === formData.email)) {
+      setError('❌ This email is already registered. Please use a different email or login if you already have an account.');
       return;
     }
 
     // Phone number validation
     const phoneRegex = /^07[2389]\d{7}$/;
     if (!phoneRegex.test(formData.phoneNumber)) {
-      setError('Phone number must start with 078, 079, 073, or 072 and be exactly 10 digits.');
+      setError('❌ Invalid phone number. Must start with 078, 079, 073, or 072 and be exactly 10 digits (e.g., 0788123456).');
       return;
     }
 
     // ID Number validation
     if (formData.idNumber.length !== 16) {
-      setError('ID Number must be exactly 16 digits.');
+      setError('❌ Invalid ID number. Must be exactly 16 digits. Please check your ID card.');
+      return;
+    }
+
+    // Check if ID already exists
+    if (users.some(u => u.idNumber === formData.idNumber)) {
+      setError('❌ This ID number is already registered. If you have an existing account, please login instead.');
       return;
     }
 
@@ -74,6 +92,12 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
           id: Math.random().toString(36).substr(2, 9)
         }),
       });
+
+      // Check if response is OK
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Server error occurred' }));
+        throw new Error(errorData.message || `Server returned error: ${response.status}`);
+      }
 
       const data = await response.json();
 
@@ -94,11 +118,30 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
           navigate('/login');
         }, 2000);
       } else {
-        setError(data.message || 'Registration failed. Please try again.');
+        // Handle specific server error messages
+        let errorMessage = data.message || 'Registration failed. Please try again.';
+        
+        if (errorMessage.toLowerCase().includes('verification')) {
+          errorMessage = `⚠️ ${errorMessage} Your account was created but needs verification. Please contact HR at hr@company.com to complete your verification.`;
+        } else if (errorMessage.toLowerCase().includes('duplicate')) {
+          errorMessage = `❌ ${errorMessage} It appears your email or ID is already in the system. Please login or contact HR.`;
+        } else if (errorMessage.toLowerCase().includes('invalid')) {
+          errorMessage = `❌ Invalid data submitted: ${errorMessage}. Please review your information and try again.`;
+        } else {
+          errorMessage = `❌ ${errorMessage}`;
+        }
+        
+        setError(errorMessage);
       }
     } catch (err) {
       console.error('Registration error:', err);
-      setError('Connection failed. Please check if the server is running.');
+      const errorMsg = err instanceof Error ? err.message : 'Unknown error';
+      
+      if (errorMsg.includes('Failed to fetch') || errorMsg.includes('Network')) {
+        setError('❌ Connection failed. Please check if the server is running and try again. If the problem persists, contact IT support.');
+      } else {
+        setError(`❌ Registration error: ${errorMsg}. Please try again or contact support if the problem continues.`);
+      }
     } finally {
       setIsLoading(false);
     }
@@ -173,36 +216,46 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Department</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Department</label>
+                <div className="relative group">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none z-10">
                     <Briefcase size={18} />
                   </span>
                   <select
                     required
                     value={formData.department}
                     onChange={(e) => setFormData({...formData, department: e.target.value})}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none appearance-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     {departments.map(d => <option key={d} value={d} className="dark:bg-gray-900">{d}</option>)}
                   </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
                 </div>
               </div>
               <div>
-                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-1">Role</label>
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400">
+                <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">Role</label>
+                <div className="relative group">
+                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-gray-400 pointer-events-none z-10">
                     <UserIcon size={18} />
                   </span>
                   <select
                     required
                     value={formData.role}
                     onChange={(e) => setFormData({...formData, role: e.target.value as Role})}
-                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none appearance-none"
+                    className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     <option value={Role.EMPLOYEE} className="dark:bg-gray-900">Employee</option>
                     <option value={Role.HR_MANAGER} className="dark:bg-gray-900">HR Manager</option>
                   </select>
+                  <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+                    </svg>
+                  </div>
                 </div>
               </div>
             </div>

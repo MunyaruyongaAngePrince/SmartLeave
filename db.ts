@@ -151,23 +151,23 @@ export async function initDb() {
     // Initial Data
     const ignoreKeyword = 'IGNORE';
     
-    await db.query(`INSERT ${ignoreKeyword} INTO users (id, fullName, email, department, role, password) VALUES 
-      ('u1', 'John Doe', 'john@company.com', 'Engineering', 'Employee', ?),
-      ('u2', 'Jane Smith', 'jane@company.com', 'Human Resources', 'HR Manager', ?)
-    `, [hashedPassword, hashedPassword]);
+    // await db.query(`INSERT ${ignoreKeyword} INTO users (id, fullName, email, department, role, password) VALUES 
+    //   ('u1', 'John Doe', 'john@company.com', 'Engineering', 'Employee', ?),
+    //   ('u2', 'Jane Smith', 'jane@company.com', 'Human Resources', 'HR Manager', ?)
+    // `, [hashedPassword, hashedPassword]);
 
-    await db.query(`INSERT ${ignoreKeyword} INTO leave_balances (userId, category, balance) VALUES 
-      ('u1', 'Annual Leave', 21),
-      ('u1', 'Sick Leave', 15),
-      ('u2', 'Annual Leave', 21),
-      ('u2', 'Sick Leave', 15)
-    `);
+    // await db.query(`INSERT ${ignoreKeyword} INTO leave_balances (userId, category, balance) VALUES 
+    //   ('u1', 'Annual Leave', 21),
+    //   ('u1', 'Sick Leave', 15),
+    //   ('u2', 'Annual Leave', 21),
+    //   ('u2', 'Sick Leave', 15)
+    // `);
 
-    await db.query(`INSERT ${ignoreKeyword} INTO departments (id, name, head, status) VALUES 
-      ('d1', 'Engineering', 'Robert Wilson', 'Active'),
-      ('d2', 'Marketing', 'Sarah Jenkins', 'Active'),
-      ('d3', 'Human Resources', 'Jane Smith', 'Active')
-    `);
+    // await db.query(`INSERT ${ignoreKeyword} INTO departments (id, name, head, status) VALUES 
+    //   ('d1', 'Engineering', 'Robert Wilson', 'Active'),
+    //   ('d2', 'Marketing', 'Sarah Jenkins', 'Active'),
+    //   ('d3', 'Human Resources', 'Jane Smith', 'Active')
+    // `);
 
     await db.query(`INSERT ${ignoreKeyword} INTO holidays (id, name, date, type, is_annual) VALUES 
       ('h1', 'New Year Day', '2026-01-01', 'Public', TRUE),

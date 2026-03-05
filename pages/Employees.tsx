@@ -538,7 +538,7 @@ const Employees: React.FC<EmployeesProps> = ({ users, setUsers, onAddNotificatio
                       required 
                       value={formData.fullName}
                       onChange={(e) => setFormData({...formData, fullName: e.target.value})}
-                      placeholder="e.g. Jean Paul Habimana"
+                      placeholder="e.g.  Ange Prince"
                       className="w-full pl-10 pr-4 py-2.5 bg-gray-50 dark:bg-gray-900 border border-transparent focus:border-indigo-500 rounded-xl outline-none transition-all dark:text-white text-sm font-semibold" 
                     />
                   </div>

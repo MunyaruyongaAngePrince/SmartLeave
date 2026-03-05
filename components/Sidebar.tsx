@@ -142,7 +142,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
                 onClick={handleLogout}
                 className="w-full py-3.5 bg-red-600 text-white text-sm font-bold rounded-2xl hover:bg-red-700 shadow-lg shadow-red-100 dark:shadow-none transition-all active:scale-[0.98]"
               >
-                Yes, Sign Out
+                Sign Out
               </button>
               <button 
                 onClick={() => setIsLogoutModalOpen(false)}

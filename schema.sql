@@ -87,7 +87,8 @@ CREATE TABLE IF NOT EXISTS holidays (
     id VARCHAR(50) PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     date DATE NOT NULL,
-    type ENUM('Public', 'Company') DEFAULT 'Public'
+    type ENUM('Public', 'Company') DEFAULT 'Public',
+    is_annual BOOLEAN DEFAULT TRUE COMMENT 'If true, holiday recurs annually on the same month-day'
 );
 
 -- Leave Balances Table
@@ -109,15 +110,15 @@ INSERT IGNORE INTO departments (id, name, head, status) VALUES
 ('d2', 'Marketing', 'Sarah Jenkins', 'Active'),
 ('d3', 'Human Resources', 'Jane Smith', 'Active');
 
-INSERT IGNORE INTO holidays (id, name, date, type) VALUES
-('h1', 'New Year''s Day', '2025-01-01', 'Public'),
-('h2', 'Heroes'' Day', '2025-02-01', 'Public'),
-('h3', 'Tutsi Genocide Memorial Day', '2025-04-07', 'Public'),
-('h4', 'Independence Day', '2025-07-01', 'Public'),
-('h5', 'Liberation Day', '2025-07-04', 'Public'),
-('h6', 'Umuganura Day', '2025-08-01', 'Public'),
-('h7', 'Christmas Day', '2025-12-25', 'Public'),
-('h8', 'Boxing Day', '2025-12-26', 'Public');
+INSERT IGNORE INTO holidays (id, name, date, type, is_annual) VALUES
+('h1', 'New Year''s Day', '2026-01-01', 'Public', TRUE),
+('h2', 'Heroes'' Day', '2026-02-01', 'Public', TRUE),
+('h3', 'Tutsi Genocide Memorial Day', '2026-04-07', 'Public', TRUE),
+('h4', 'Independence Day', '2026-07-01', 'Public', TRUE),
+('h5', 'Liberation Day', '2026-07-04', 'Public', TRUE),
+('h6', 'Umuganura Day', '2026-08-01', 'Public', TRUE),
+('h7', 'Christmas Day', '2026-12-25', 'Public', TRUE),
+('h8', 'Boxing Day', '2026-12-26', 'Public', TRUE);
 
 INSERT IGNORE INTO leave_balances (userId, category, balance) VALUES 
 ('u1', 'Annual Leave', 21),

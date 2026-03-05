@@ -104,7 +104,8 @@ export async function initDb() {
         id VARCHAR(50) PRIMARY KEY,
         name VARCHAR(255) NOT NULL,
         date DATE NOT NULL,
-        type VARCHAR(50) DEFAULT 'Public'
+        type VARCHAR(50) DEFAULT 'Public',
+        is_annual BOOLEAN DEFAULT TRUE COMMENT 'If true, holiday recurs annually on the same month-day'
       );
 
       CREATE TABLE IF NOT EXISTS leave_balances (
@@ -118,6 +119,16 @@ export async function initDb() {
 
     // Execute schema
     await db.query(schema);
+
+    // Add is_annual column to holidays table if it doesn't exist
+    try {
+      await db.query(`ALTER TABLE holidays ADD COLUMN is_annual BOOLEAN DEFAULT TRUE`);
+    } catch (error: any) {
+      // Column might already exist, that's okay
+      if (error?.code !== 'ER_DUP_FIELDNAME') {
+        console.warn('[DB] Could not add is_annual column:', error?.message);
+      }
+    }
 
     const hashedPassword = await bcrypt.hash('password123', 10);
 
@@ -142,22 +153,22 @@ export async function initDb() {
       ('d3', 'Human Resources', 'Jane Smith', 'Active')
     `);
 
-    await db.query(`INSERT ${ignoreKeyword} INTO holidays (id, name, date, type) VALUES 
-      ('h1', 'New Year Day', '2026-01-01', 'Public'),
-      ('h2', 'New Year Holiday', '2026-01-02', 'Public'),
-      ('h3', 'National Heroes Day', '2026-02-01', 'Public'),
-      ('h4', 'Eid al-Fitr', '2026-03-20', 'Public'),
-      ('h5', 'Good Friday', '2026-04-03', 'Public'),
-      ('h6', 'Easter Monday', '2026-04-06', 'Public'),
-      ('h7', 'Genocide Memorial Day', '2026-04-07', 'Public'),
-      ('h8', 'Labor Day', '2026-05-01', 'Public'),
-      ('h9', 'Eid al-Adha', '2026-05-27', 'Public'),
-      ('h10', 'Independence Day', '2026-07-01', 'Public'),
-      ('h11', 'Liberation Day', '2026-07-04', 'Public'),
-      ('h12', 'Umuganura (Harvest Day)', '2026-08-07', 'Public'),
-      ('h13', 'Assumption Day', '2026-08-15', 'Public'),
-      ('h14', 'Christmas Day', '2026-12-25', 'Public'),
-      ('h15', 'Boxing Day', '2026-12-26', 'Public')
+    await db.query(`INSERT ${ignoreKeyword} INTO holidays (id, name, date, type, is_annual) VALUES 
+      ('h1', 'New Year Day', '2026-01-01', 'Public', TRUE),
+      ('h2', 'New Year Holiday', '2026-01-02', 'Public', TRUE),
+      ('h3', 'National Heroes Day', '2026-02-01', 'Public', TRUE),
+      ('h4', 'Eid al-Fitr', '2026-03-20', 'Public', FALSE),
+      ('h5', 'Good Friday', '2026-04-03', 'Public', FALSE),
+      ('h6', 'Easter Monday', '2026-04-06', 'Public', FALSE),
+      ('h7', 'Genocide Memorial Day', '2026-04-07', 'Public', TRUE),
+      ('h8', 'Labor Day', '2026-05-01', 'Public', TRUE),
+      ('h9', 'Eid al-Adha', '2026-05-27', 'Public', FALSE),
+      ('h10', 'Independence Day', '2026-07-01', 'Public', TRUE),
+      ('h11', 'Liberation Day', '2026-07-04', 'Public', TRUE),
+      ('h12', 'Umuganura (Harvest Day)', '2026-08-07', 'Public', TRUE),
+      ('h13', 'Assumption Day', '2026-08-15', 'Public', TRUE),
+      ('h14', 'Christmas Day', '2026-12-25', 'Public', TRUE),
+      ('h15', 'Boxing Day', '2026-12-26', 'Public', TRUE)
     `);
 
     console.log('[DB] Database initialized successfully (MySQL)');

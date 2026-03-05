@@ -45,7 +45,6 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
 
   const categorizedHolidays = useMemo(() => {
     const now = getLocalDateAtMidnight();
-    const currentYear = now.getFullYear();
 
     // Deduplicate holidays by date (keep first occurrence)
     const seenDates = new Set<string>();
@@ -55,13 +54,13 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
       return true;
     });
 
-    const upcoming = uniqueHolidays.filter(h => parseLocalDate(h.date) >= now)
+    const upcoming = uniqueHolidays
+      .filter(h => parseLocalDate(h.date) >= now)
       .sort((a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime());
     
-    const past = uniqueHolidays.filter(h => {
-      const d = parseLocalDate(h.date);
-      return d < now && d.getFullYear() === currentYear;
-    }).sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
+    const past = uniqueHolidays
+      .filter(h => parseLocalDate(h.date) < now)
+      .sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
 
     return { upcoming, past };
   }, [holidays]);

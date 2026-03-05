@@ -798,8 +798,64 @@ async function startServer() {
   // Holidays
   app.get('/api/holidays', async (req, res) => {
     try {
-      const [rows] = await db.query('SELECT * FROM holidays ORDER BY date ASC');
-      res.json({ success: true, data: rows });
+      const [rows]: any = await db.query('SELECT * FROM holidays ORDER BY date ASC');
+      
+      // Expand annual holidays for current and next years
+      const currentYear = new Date().getFullYear();
+      const expandedHolidays: any[] = [];
+      const seenDates = new Set<string>();
+
+      for (const holiday of rows) {
+        // Parse date - handle both Date objects and strings
+        let dateObj: Date;
+        if (holiday.date instanceof Date) {
+          dateObj = holiday.date;
+        } else {
+          // Parse string date (YYYY-MM-DD format)
+          dateObj = new Date(holiday.date + 'T00:00:00');
+        }
+        
+        if (holiday.is_annual) {
+          // For annual holidays, create instances for current and next year
+          const month = dateObj.getMonth() + 1;
+          const day = dateObj.getDate();
+          
+          for (let year of [currentYear, currentYear + 1]) {
+            // Format date as YYYY-MM-DD
+            const monthStr = String(month).padStart(2, '0');
+            const dayStr = String(day).padStart(2, '0');
+            const newDate = `${year}-${monthStr}-${dayStr}`;
+            
+            // Avoid duplicates
+            if (!seenDates.has(newDate)) {
+              seenDates.add(newDate);
+              expandedHolidays.push({
+                ...holiday,
+                date: newDate,
+                baseHolidayId: holiday.id // Track original holiday
+              });
+            }
+          }
+        } else {
+          // Non-annual holidays are included as-is
+          const dateStr = holiday.date instanceof Date 
+            ? holiday.date.toISOString().split('T')[0]
+            : holiday.date;
+          
+          if (!seenDates.has(dateStr)) {
+            seenDates.add(dateStr);
+            expandedHolidays.push({
+              ...holiday,
+              date: dateStr
+            });
+          }
+        }
+      }
+      
+      // Sort by date
+      expandedHolidays.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+      
+      res.json({ success: true, data: expandedHolidays });
     } catch (error) {
       const { message, code, status } = handleDbError(error, 'Fetch holidays');
       sendError(res, status, message, code);

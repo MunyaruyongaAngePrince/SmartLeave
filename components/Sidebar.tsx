@@ -10,7 +10,8 @@ import {
   X,
   FileText,
   Users,
-  Building2
+  Building2,
+  Gift
 } from 'lucide-react';
 import { User, Role } from '../types';
 
@@ -45,6 +46,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
     return [
       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
       { name: 'Apply Leave', path: '/apply', icon: CalendarPlus },
+      { name: 'Pension Request', path: '/pension', icon: Gift },
       { name: 'Leave History', path: '/history', icon: History },
       { name: 'My Profile', path: '/profile', icon: UserIcon },
     ];

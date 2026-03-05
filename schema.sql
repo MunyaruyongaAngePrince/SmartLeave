@@ -53,6 +53,23 @@ CREATE TABLE IF NOT EXISTS encashment_requests (
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
 
+-- Pension Requests Table
+CREATE TABLE IF NOT EXISTS pension_requests (
+    id VARCHAR(50) PRIMARY KEY,
+    userId VARCHAR(50) NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    phoneNumber VARCHAR(20),
+    dateOfBirth DATE NOT NULL,
+    retirementCategory ENUM('Normal Retirement', 'Early Retirement', 'Medical Retirement') NOT NULL,
+    reason TEXT NOT NULL,
+    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    appliedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    supportingDoc LONGTEXT,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
+
 -- Notifications Table
 CREATE TABLE IF NOT EXISTS notifications (
     id VARCHAR(50) PRIMARY KEY,

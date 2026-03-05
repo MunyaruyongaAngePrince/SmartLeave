@@ -543,6 +543,87 @@ async function startServer() {
     }
   });
 
+  // Pension Requests
+  app.use('/api/pensions', authenticateToken);
+
+  app.get('/api/pensions', async (req, res) => {
+    try {
+      const [rows] = await db.query('SELECT * FROM pension_requests ORDER BY appliedDate DESC');
+      res.json({ success: true, data: rows });
+    } catch (error) {
+      const { message, code, status } = handleDbError(error, 'Fetch pension requests');
+      sendError(res, status, message, code);
+    }
+  });
+
+  app.post('/api/pensions', async (req, res) => {
+    const { id, userId, fullName, email, department, phoneNumber, dateOfBirth, retirementCategory, reason, status, appliedDate, supportingDoc } = req.body;
+
+    // Validation
+    if (!userId || !fullName || !email || !dateOfBirth || !retirementCategory || !reason) {
+      return sendError(res, 400, 'All required fields must be completed.', 'MISSING_FIELD');
+    }
+
+    // Validate date of birth
+    const dob = new Date(dateOfBirth);
+    const today = new Date();
+    const age = today.getFullYear() - dob.getFullYear();
+    
+    if (dob > today) {
+      return sendError(res, 400, 'Date of birth cannot be in the future.', 'INVALID_DATE');
+    }
+
+    if (age < 18) {
+      return sendError(res, 400, 'Employee must be at least 18 years old.', 'INVALID_AGE');
+    }
+
+    try {
+      console.log(`[PENSION] Creating pension request for: ${fullName}`);
+      await db.query(
+        'INSERT INTO pension_requests (id, userId, fullName, email, department, phoneNumber, dateOfBirth, retirementCategory, reason, status, appliedDate, supportingDoc) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [id, userId, fullName, email, department, phoneNumber, dateOfBirth, retirementCategory, reason, status || 'Pending', appliedDate || new Date().toISOString(), supportingDoc || null]
+      );
+      console.log(`[PENSION] Pension request created: ${id}`);
+      res.json({ success: true, message: 'Pension request submitted successfully.' });
+    } catch (error) {
+      const { message, code, status: errorStatus } = handleDbError(error, 'Create pension request');
+      sendError(res, errorStatus, message, code);
+    }
+  });
+
+  app.patch('/api/pensions/:id', async (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    // Validation
+    if (!status || !['Pending', 'Approved', 'Rejected'].includes(status)) {
+      return sendError(res, 400, 'Valid status (Pending, Approved, or Rejected) is required.', 'INVALID_STATUS');
+    }
+
+    try {
+      const [penRows] = await db.query('SELECT * FROM pension_requests WHERE id = ?', [id]);
+      const pen = (penRows as any[])[0];
+      if (!pen) {
+        return sendError(res, 404, 'Pension request not found. Please check the request ID.', 'PENSION_NOT_FOUND');
+      }
+
+      await db.query('UPDATE pension_requests SET status = ? WHERE id = ?', [status, id]);
+
+      // Fetch user email for notification
+      const [userRows] = await db.query('SELECT email, fullName FROM users WHERE id = ?', [pen.userId]);
+      const user = (userRows as any[])[0];
+      if (user) {
+        sendLeaveStatusNotification(user.email, user.fullName, 'Pension Request', status).catch(err => console.error('[EMAIL] Notification error:', err));
+      }
+
+      console.log(`[PENSION] Pension request ${id} status updated to: ${status}`);
+      res.json({ success: true, message: `Pension request has been ${status.toLowerCase()}.` });
+    } catch (error) {
+      const { message, code, status } = handleDbError(error, 'Update pension request');
+      sendError(res, status, message, code);
+    }
+  });
+
   // Reporting
   app.get('/api/reports/summary', async (req, res) => {
     try {

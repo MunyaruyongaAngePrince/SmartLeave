@@ -20,6 +20,12 @@ export enum LeaveCategory {
   EMERGENCY = 'Emergency Leave'
 }
 
+export enum RetirementCategory {
+  NORMAL = 'Normal Retirement',
+  EARLY = 'Early Retirement',
+  MEDICAL = 'Medical Retirement'
+}
+
 export interface User {
   id: string;
   fullName: string;
@@ -60,6 +66,21 @@ export interface EncashmentRequest {
   daysToSell: number;
   status: LeaveStatus;
   reason: string;
+  appliedDate: string;
+  supportingDoc?: string;
+}
+
+export interface PensionRequest {
+  id: string;
+  userId: string;
+  fullName: string;
+  email: string;
+  department: string;
+  phoneNumber?: string;
+  dateOfBirth: string;
+  retirementCategory: RetirementCategory;
+  reason: string;
+  status: LeaveStatus;
   appliedDate: string;
   supportingDoc?: string;
 }

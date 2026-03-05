@@ -25,6 +25,7 @@ import {
   Cell
 } from 'recharts';
 import { User, LeaveRequest, EncashmentRequest, LeaveStatus, LeaveCategory, LeaveBalance } from '../types';
+import { parseLocalDate, getLocalDateAtMidnight, formatDateToString } from '../utils/dateUtils';
 
 interface EmployeeDashboardProps {
   user: User;
@@ -154,27 +155,25 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ user, leaves, enc
   }, [userLeaves, userEncashments]);
 
   const upcomingHolidays = useMemo(() => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    const today = getLocalDateAtMidnight();
 
     // Deduplicate holidays by date (keep first occurrence)
     const seenDates = new Set<string>();
     const uniqueHolidays = holidays.filter(h => {
-      const dateStr = new Date(h.date).toISOString().split('T')[0];
-      if (seenDates.has(dateStr)) return false;
-      seenDates.add(dateStr);
+      if (seenDates.has(h.date)) return false;
+      seenDates.add(h.date);
       return true;
     });
 
     return uniqueHolidays
-      .filter(h => new Date(h.date) >= today)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime())
+      .filter(h => parseLocalDate(h.date) >= today)
+      .sort((a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime())
       .slice(0, 3);
   }, [holidays]);
 
   const isSoon = (dateStr: string) => {
-    const holidayDate = new Date(dateStr);
-    const today = new Date();
+    const holidayDate = parseLocalDate(dateStr);
+    const today = getLocalDateAtMidnight();
     const diffTime = holidayDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays >= 0 && diffDays <= 7;
@@ -350,7 +349,7 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ user, leaves, enc
                         <span className="ml-2 px-1.5 py-0.5 bg-indigo-100 dark:bg-indigo-900 text-indigo-700 dark:text-indigo-300 text-[8px] font-black uppercase rounded">Coming Soon</span>
                       )}
                     </div>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">{new Date(holiday.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{parseLocalDate(holiday.date).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</p>
                   </div>
                 </div>
               ))

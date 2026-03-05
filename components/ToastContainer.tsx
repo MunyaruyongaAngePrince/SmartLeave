@@ -71,7 +71,16 @@ const ToastContainer: React.FC = () => {
   };
 
   return (
-    <div className="fixed top-4 right-4 z-50 max-w-sm space-y-3 pointer-events-none">
+    <div 
+      style={{
+        position: 'fixed',
+        top: '1rem',
+        left: '50%',
+        transform: 'translateX(-50%)',
+        zIndex: 9999,
+      }}
+      className="max-w-sm space-y-3 pointer-events-none md:left-auto md:right-4 md:transform-none md:translate-x-0"
+    >
       {toasts.map(toast => {
         const styles = getStyles(toast.type);
 

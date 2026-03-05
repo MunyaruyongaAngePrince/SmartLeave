@@ -2,6 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import { Calendar as CalendarIcon, Gift, ChevronLeft, ChevronRight, Info, Search, History, Clock, Plane } from 'lucide-react';
 import { User, LeaveRequest, LeaveStatus } from '../types';
+import { parseLocalDate, getLocalDateAtMidnight, isDateInMonth } from '../utils/dateUtils';
 
 interface HolidaysProps {
   user: User;
@@ -34,39 +35,33 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
     // Deduplicate holidays by date (keep first occurrence)
     const seenDates = new Set<string>();
     const uniqueHolidays = holidays.filter(h => {
-      const dateStr = new Date(h.date).toISOString().split('T')[0];
-      if (seenDates.has(dateStr)) return false;
-      seenDates.add(dateStr);
+      if (seenDates.has(h.date)) return false;
+      seenDates.add(h.date);
       return true;
     });
 
-    return uniqueHolidays.filter(h => {
-      const d = new Date(h.date);
-      return d.getMonth() === viewMonth && d.getFullYear() === viewYear;
-    });
+    return uniqueHolidays.filter(h => isDateInMonth(h.date, viewMonth, viewYear));
   }, [holidays, viewMonth, viewYear]);
 
   const categorizedHolidays = useMemo(() => {
-    const now = new Date();
+    const now = getLocalDateAtMidnight();
     const currentYear = now.getFullYear();
-    const todayStart = new Date().setHours(0,0,0,0);
 
     // Deduplicate holidays by date (keep first occurrence)
     const seenDates = new Set<string>();
     const uniqueHolidays = holidays.filter(h => {
-      const dateStr = new Date(h.date).toISOString().split('T')[0];
-      if (seenDates.has(dateStr)) return false;
-      seenDates.add(dateStr);
+      if (seenDates.has(h.date)) return false;
+      seenDates.add(h.date);
       return true;
     });
 
-    const upcoming = uniqueHolidays.filter(h => new Date(h.date).getTime() >= todayStart)
-      .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const upcoming = uniqueHolidays.filter(h => parseLocalDate(h.date) >= now)
+      .sort((a, b) => parseLocalDate(a.date).getTime() - parseLocalDate(b.date).getTime());
     
     const past = uniqueHolidays.filter(h => {
-      const d = new Date(h.date);
-      return d.getTime() < todayStart && d.getFullYear() === currentYear;
-    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+      const d = parseLocalDate(h.date);
+      return d < now && d.getFullYear() === currentYear;
+    }).sort((a, b) => parseLocalDate(b.date).getTime() - parseLocalDate(a.date).getTime());
 
     return { upcoming, past };
   }, [holidays]);
@@ -76,7 +71,8 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
   };
 
   const isSoon = (dateStr: string) => {
-    const holidayDate = new Date(dateStr);
+    const holidayDate = parseLocalDate(dateStr);
+    const today = getLocalDateAtMidnight();
     const diffTime = holidayDate.getTime() - today.getTime();
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
     return diffDays >= 0 && diffDays <= 14;
@@ -87,8 +83,8 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
     date.setHours(0, 0, 0, 0);
     
     return approvedLeaves.find(leave => {
-      const start = new Date(leave.startDate);
-      const end = new Date(leave.endDate);
+      const start = parseLocalDate(leave.startDate);
+      const end = parseLocalDate(leave.endDate);
       start.setHours(0, 0, 0, 0);
       end.setHours(0, 0, 0, 0);
       return date >= start && date <= end;
@@ -154,7 +150,7 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
                   if (day === null) return <div key={i} className="invisible"></div>;
                   
                   const dateObj = new Date(viewYear, viewMonth, day);
-                  const isHoliday = monthHolidays.some(h => new Date(h.date).getDate() === day);
+                  const isHoliday = monthHolidays.some(h => parseLocalDate(h.date).getDate() === day);
                   const leave = isDateInLeave(day);
                   const isToday = day === today.getDate() && viewMonth === today.getMonth() && viewYear === today.getFullYear();
                   const isWeekend = (i % 7 === 0 || i % 7 === 6);
@@ -225,7 +221,7 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
             <div className="p-2 space-y-1 max-h-[400px] overflow-y-auto custom-scrollbar">
               {categorizedHolidays.upcoming.length > 0 ? (
                 categorizedHolidays.upcoming.map((holiday) => {
-                  const date = new Date(holiday.date);
+                  const date = parseLocalDate(holiday.date);
                   const soon = isSoon(holiday.date);
                   return (
                     <div key={holiday.id} className={`flex items-center p-3 rounded-2xl transition-all ${soon ? 'bg-indigo-50 dark:bg-indigo-900/30 ring-1 ring-indigo-100 dark:ring-indigo-800' : 'hover:bg-gray-50 dark:hover:bg-gray-700'}`}>
@@ -260,7 +256,7 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
             <div className="p-2 space-y-1 max-h-[300px] overflow-y-auto custom-scrollbar grayscale">
               {categorizedHolidays.past.length > 0 ? (
                 categorizedHolidays.past.map((holiday) => {
-                  const date = new Date(holiday.date);
+                  const date = parseLocalDate(holiday.date);
                   return (
                     <div key={holiday.id} className="flex items-center p-3 rounded-2xl hover:bg-gray-50 dark:hover:bg-gray-700 transition-all opacity-60">
                       <div className="w-10 h-10 rounded-xl bg-gray-100 dark:bg-gray-900 text-gray-400 flex flex-col items-center justify-center shrink-0 mr-4">

@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
+import { parseLocalDate, getLocalDateAtMidnight, isDateInMonth } from '../utils/dateUtils';
 
 interface MiniCalendarProps {
   holidays: any[];
@@ -26,16 +27,12 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ holidays, approvedLeaves = 
     // Deduplicate holidays by date (keep first occurrence)
     const seenDates = new Set<string>();
     const uniqueHolidays = holidays.filter((h: any) => {
-      const dateStr = new Date(h.date).toISOString().split('T')[0];
-      if (seenDates.has(dateStr)) return false;
-      seenDates.add(dateStr);
+      if (seenDates.has(h.date)) return false;
+      seenDates.add(h.date);
       return true;
     });
 
-    return uniqueHolidays.filter(h => {
-      const d = new Date(h.date);
-      return d.getMonth() === month && d.getFullYear() === year;
-    });
+    return uniqueHolidays.filter(h => isDateInMonth(h.date, month, year));
   }, [holidays, month, year]);
 
   const monthLeaves = approvedLeaves.filter(l => {
@@ -45,13 +42,13 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ holidays, approvedLeaves = 
            (end.getMonth() === month && end.getFullYear() === year);
   });
 
-  const isHoliday = (day: number) => monthHolidays.some(h => new Date(h.date).getDate() === day);
+  const isHoliday = (day: number) => monthHolidays.some(h => parseLocalDate(h.date).getDate() === day);
   const isLeave = (day: number) => {
     const date = new Date(year, month, day);
     date.setHours(0,0,0,0);
     return monthLeaves.some(l => {
-      const s = new Date(l.startDate);
-      const e = new Date(l.endDate);
+      const s = parseLocalDate(l.startDate);
+      const e = parseLocalDate(l.endDate);
       s.setHours(0,0,0,0);
       e.setHours(0,0,0,0);
       return date >= s && date <= e;

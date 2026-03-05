@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { User, Role, LeaveRequest, EncashmentRequest, AppNotification, Department, LeaveBalance } from './types';
+import { User, Role, LeaveRequest, EncashmentRequest, PensionRequest, AppNotification, Department, LeaveBalance } from './types';
 import { MOCK_LEAVES, MOCK_DEPARTMENTS } from './constants';
 import { notificationService, handleErrorNotification } from './services/notificationService';
 import { parseApiError, logError } from './services/errorHandler';
@@ -20,6 +20,7 @@ import LeaveManage from './pages/LeaveManage';
 import Employees from './pages/Employees';
 import Departments from './pages/Departments';
 import ApplyLeave from './pages/ApplyLeave';
+import PensionRequestPage from './pages/PensionRequest';
 import LeaveHistory from './pages/LeaveHistory';
 import Profile from './pages/Profile';
 import Holidays from './pages/Holidays';
@@ -38,6 +39,7 @@ const App: React.FC = () => {
   const [leaves, setLeaves] = useState<LeaveRequest[]>([]);
   const [balances, setBalances] = useState<LeaveBalance[]>([]);
   const [encashments, setEncashments] = useState<EncashmentRequest[]>([]);
+  const [pensions, setPensions] = useState<PensionRequest[]>([]);
 
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [holidays, setHolidays] = useState<any[]>([]);
@@ -145,6 +147,9 @@ const App: React.FC = () => {
     // Fetch encashments
     fetchData('/api/encashments', setEncashments, 'encashments');
 
+    // Fetch pensions
+    fetchData('/api/pensions', setPensions, 'pension requests');
+
     // Fetch balances
     fetchData(`/api/balances/${currentUser.id}`, setBalances, 'leave balances');
 
@@ -167,6 +172,10 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('smart_leave_encashments', JSON.stringify(encashments));
   }, [encashments]);
+
+  useEffect(() => {
+    localStorage.setItem('smart_leave_pensions', JSON.stringify(pensions));
+  }, [pensions]);
 
   useEffect(() => {
     localStorage.setItem('smart_leave_users', JSON.stringify(users));
@@ -291,6 +300,18 @@ const App: React.FC = () => {
                     setLeaves={setLeaves} 
                     encashments={encashments} 
                     setEncashments={setEncashments} 
+                    onAddNotification={addNotification}
+                    users={users}
+                  />
+                ) : <Navigate to="/login" />} 
+              />
+              <Route 
+                path="/pension" 
+                element={currentUser && !isAdminOrHR ? (
+                  <PensionRequestPage 
+                    user={currentUser} 
+                    pensions={pensions} 
+                    setPensions={setPensions} 
                     onAddNotification={addNotification}
                     users={users}
                   />

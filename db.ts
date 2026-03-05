@@ -115,6 +115,22 @@ export async function initDb() {
         PRIMARY KEY (userId, category),
         FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
       );
+
+      CREATE TABLE IF NOT EXISTS pension_requests (
+        id VARCHAR(50) PRIMARY KEY,
+        userId VARCHAR(50) NOT NULL,
+        fullName VARCHAR(255) NOT NULL,
+        email VARCHAR(255) NOT NULL,
+        department VARCHAR(100) NOT NULL,
+        phoneNumber VARCHAR(20),
+        dateOfBirth DATE NOT NULL,
+        retirementCategory VARCHAR(100) NOT NULL,
+        reason TEXT,
+        status VARCHAR(50) DEFAULT 'Pending',
+        appliedDate DATETIME DEFAULT CURRENT_TIMESTAMP,
+        supportingDoc TEXT,
+        FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+      );
     `;
 
     // Execute schema

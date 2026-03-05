@@ -26,6 +26,7 @@ import {
 } from 'recharts';
 import { User, LeaveRequest, EncashmentRequest, LeaveStatus, LeaveCategory, LeaveBalance } from '../types';
 import { parseLocalDate, getLocalDateAtMidnight, formatDateToString } from '../utils/dateUtils';
+import MiniCalendar from '../components/MiniCalendar';
 
 interface EmployeeDashboardProps {
   user: User;
@@ -282,6 +283,26 @@ const EmployeeDashboard: React.FC<EmployeeDashboardProps> = ({ user, leaves, enc
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <div hidden className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center">
+              <CalendarIcon className="mr-2 text-indigo-600 dark:text-indigo-400" size={20} />
+              My Calendar
+            </h3>
+          </div>
+          <MiniCalendar holidays={holidays} approvedLeaves={userLeaves.filter(l => l.status === LeaveStatus.APPROVED)} />
+          <div className="mt-4 flex items-center justify-center gap-4 text-xs">
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-pink-500 mr-1"></div>
+              <span className="text-gray-500 dark:text-gray-400">Holiday</span>
+            </div>
+            <div className="flex items-center">
+              <div className="w-2 h-2 rounded-full bg-emerald-500 mr-1"></div>
+              <span className="text-gray-500 dark:text-gray-400">My Leave</span>
+            </div>
+          </div>
+        </div>
+
         <div className="bg-white dark:bg-gray-800 p-6 rounded-3xl shadow-sm border border-gray-100 dark:border-gray-700">
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-lg font-bold text-gray-800 dark:text-gray-100 flex items-center">

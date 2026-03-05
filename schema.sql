@@ -100,15 +100,32 @@ CREATE TABLE IF NOT EXISTS leave_balances (
     FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
 );
 
--- Initial Data
-INSERT IGNORE INTO users (id, fullName, email, department, role, password) VALUES 
-('u1', 'John Doe', 'john@company.com', 'Engineering', 'Employee', 'password123'),
-('u2', 'Jane Smith', 'jane@company.com', 'Human Resources', 'HR Manager', 'password123');
+-- Pension Requests Table
+CREATE TABLE IF NOT EXISTS pension_requests (
+    id VARCHAR(50) PRIMARY KEY,
+    userId VARCHAR(50) NOT NULL,
+    fullName VARCHAR(100) NOT NULL,
+    email VARCHAR(100) NOT NULL,
+    department VARCHAR(50) NOT NULL,
+    phoneNumber VARCHAR(20),
+    dateOfBirth DATE NOT NULL,
+    retirementCategory VARCHAR(50) NOT NULL,
+    reason TEXT,
+    status ENUM('Pending', 'Approved', 'Rejected') DEFAULT 'Pending',
+    appliedDate TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    supportingDoc LONGTEXT,
+    FOREIGN KEY (userId) REFERENCES users(id) ON DELETE CASCADE
+);
 
-INSERT IGNORE INTO departments (id, name, head, status) VALUES 
-('d1', 'Engineering', 'Robert Wilson', 'Active'),
-('d2', 'Marketing', 'Sarah Jenkins', 'Active'),
-('d3', 'Human Resources', 'Jane Smith', 'Active');
+-- Initial Data
+-- INSERT IGNORE INTO users (id, fullName, email, department, role, password) VALUES 
+-- ('u1', 'John Doe', 'john@company.com', 'Engineering', 'Employee', 'password123'),
+-- ('u2', 'Jane Smith', 'jane@company.com', 'Human Resources', 'HR Manager', 'password123');
+
+-- INSERT IGNORE INTO departments (id, name, head, status) VALUES 
+-- ('d1', 'Engineering', 'Robert Wilson', 'Active'),
+-- ('d2', 'Marketing', 'Sarah Jenkins', 'Active'),
+-- ('d3', 'Human Resources', 'Jane Smith', 'Active');
 
 INSERT IGNORE INTO holidays (id, name, date, type, is_annual) VALUES
 ('h1', 'New Year''s Day', '2026-01-01', 'Public', TRUE),
@@ -120,14 +137,14 @@ INSERT IGNORE INTO holidays (id, name, date, type, is_annual) VALUES
 ('h7', 'Christmas Day', '2026-12-25', 'Public', TRUE),
 ('h8', 'Boxing Day', '2026-12-26', 'Public', TRUE);
 
-INSERT IGNORE INTO leave_balances (userId, category, balance) VALUES 
-('u1', 'Annual Leave', 21),
-('u1', 'Sick Leave', 15),
-('u1', 'Maternity Leave', 15),
-('u1', 'Paternity Leave', 15),
-('u1', 'Emergency Leave', 15),
-('u2', 'Annual Leave', 21),
-('u2', 'Sick Leave', 15),
-('u2', 'Maternity Leave', 15),
-('u2', 'Paternity Leave', 15),
-('u2', 'Emergency Leave', 15);
+-- INSERT IGNORE INTO leave_balances (userId, category, balance) VALUES 
+-- ('u1', 'Annual Leave', 21),
+-- ('u1', 'Sick Leave', 15),
+-- ('u1', 'Maternity Leave', 15),
+-- ('u1', 'Paternity Leave', 15),
+-- ('u1', 'Emergency Leave', 15),
+-- ('u2', 'Annual Leave', 21),
+-- ('u2', 'Sick Leave', 15),
+-- ('u2', 'Maternity Leave', 15),
+-- ('u2', 'Paternity Leave', 15),
+-- ('u2', 'Emergency Leave', 15);

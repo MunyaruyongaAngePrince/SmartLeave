@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { initDb, getDb, getEngine } from './db';
-import { sendLoginNotification, sendLeaveStatusNotification } from './services/emailService';
+import { sendLoginNotification, sendLeaveStatusNotification, sendPensionStatusNotification, sendHRAssignedLeaveNotification } from './services/emailService';
 
 dotenv.config();
 
@@ -412,6 +412,13 @@ async function startServer() {
           'UPDATE leave_balances SET balance = balance - ? WHERE userId = ? AND category = ?',
           [days, userId, category]
         );
+
+        // Send email notification to employee about HR-assigned leave
+        const [userRows] = await db.query('SELECT email, fullName FROM users WHERE id = ?', [userId]);
+        const user = (userRows as any[])[0];
+        if (user) {
+          sendHRAssignedLeaveNotification(user.email, user.fullName, category, startDate, endDate, reason || 'Assigned by HR').catch(err => console.error('[EMAIL] Notification error:', err));
+        }
       }
 
       res.json({ success: true, message: 'Leave request submitted successfully.' });
@@ -613,7 +620,7 @@ async function startServer() {
       const [userRows] = await db.query('SELECT email, fullName FROM users WHERE id = ?', [pen.userId]);
       const user = (userRows as any[])[0];
       if (user) {
-        sendLeaveStatusNotification(user.email, user.fullName, 'Pension Request', status).catch(err => console.error('[EMAIL] Notification error:', err));
+        sendPensionStatusNotification(user.email, user.fullName, pen.retirementCategory, status).catch(err => console.error('[EMAIL] Notification error:', err));
       }
 
       console.log(`[PENSION] Pension request ${id} status updated to: ${status}`);

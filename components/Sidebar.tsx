@@ -37,6 +37,7 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
       return [
         { name: 'Admin Dashboard', path: '/admin', icon: LayoutDashboard },
         { name: 'Leave Management', path: '/leave-manage', icon: FileText },
+        { name: 'Pension Management', path: '/pension-manage', icon: Gift },
         { name: 'Employees', path: '/employees', icon: Users },
         { name: 'Departments', path: '/departments', icon: Building2 },
         { name: 'Profile', path: '/profile', icon: UserIcon },
@@ -47,7 +48,9 @@ const Sidebar: React.FC<SidebarProps> = ({ user, onLogout }) => {
       { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
       { name: 'Apply Leave', path: '/apply', icon: CalendarPlus },
       { name: 'Pension Request', path: '/pension', icon: Gift },
+      // { name: 'calendar', path: '/holidays', icon: CalendarPlus },
       { name: 'Leave History', path: '/history', icon: History },
+      // { name: 'Pension History', path: '/pension-history', icon: FileText },
       { name: 'My Profile', path: '/profile', icon: UserIcon },
     ];
   };

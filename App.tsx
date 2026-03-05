@@ -17,10 +17,12 @@ import Register from './pages/Register';
 import EmployeeDashboard from './pages/EmployeeDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import LeaveManage from './pages/LeaveManage';
+import PensionManage from './pages/PensionManage';
 import Employees from './pages/Employees';
 import Departments from './pages/Departments';
 import ApplyLeave from './pages/ApplyLeave';
 import PensionRequestPage from './pages/PensionRequest';
+import PensionHistory from './pages/PensionHistory';
 import LeaveHistory from './pages/LeaveHistory';
 import Profile from './pages/Profile';
 import Holidays from './pages/Holidays';
@@ -322,6 +324,10 @@ const App: React.FC = () => {
                 element={currentUser && !isAdminOrHR ? <LeaveHistory user={currentUser} leaves={leaves} encashments={encashments} /> : <Navigate to="/login" />} 
               />
               <Route 
+                path="/pension-history" 
+                element={currentUser && !isAdminOrHR ? <PensionHistory user={currentUser} pensions={pensions} /> : <Navigate to="/login" />} 
+              />
+              <Route 
                 path="/holidays" 
                 element={currentUser ? <Holidays user={currentUser} leaves={leaves} holidays={holidays} /> : <Navigate to="/login" />} 
               />
@@ -354,6 +360,18 @@ const App: React.FC = () => {
                     setLeaves={setLeaves} 
                     encashments={encashments} 
                     setEncashments={setEncashments} 
+                    onAddNotification={addNotification}
+                    users={users}
+                  />
+                ) : <Navigate to="/login" />} 
+              />
+              <Route 
+                path="/pension-manage" 
+                element={currentUser && (currentUser.role === Role.HR_MANAGER || currentUser.role === Role.ADMIN) ? (
+                  <PensionManage 
+                    user={currentUser}
+                    pensions={pensions} 
+                    setPensions={setPensions} 
                     onAddNotification={addNotification}
                     users={users}
                   />

@@ -251,7 +251,7 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
     }
   };
 
-  const handleAssignLeave = (e: React.FormEvent) => {
+  const handleAssignLeave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
 
@@ -276,20 +276,25 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
       appliedDate: new Date().toISOString().split('T')[0]
     }));
 
-    // Persist to backend
-    Promise.all(newRequests.map(req => 
-      fetch('/api/leaves', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(req)
-      })
-    )).then(() => {
+    try {
+      const token = localStorage.getItem('smart_leave_token');
+      await Promise.all(newRequests.map(req => 
+        fetch('/api/leaves', {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+          },
+          body: JSON.stringify(req)
+        })
+      ));
+
       setLeaves(prev => [...newRequests, ...prev]);
 
       targetEmployees.forEach(emp => {
         onAddNotification({
           userId: emp.id,
-          title: 'Leave Assigned',
+          title: 'Leave Assigned by HR',
           desc: `HR has assigned you ${assignForm.category} from ${assignForm.startDate} to ${assignForm.endDate}.`,
           type: 'info'
         });
@@ -309,11 +314,11 @@ const Departments: React.FC<DepartmentsProps> = ({ users, departments, setDepart
           reason: ''
         });
       }, 1500);
-    }).catch(err => {
+    } catch (err) {
       console.error('Failed to assign leaves:', err);
       setIsSaving(false);
       alert('Failed to assign leaves. Please try again.');
-    });
+    }
   };
 
   const handlePrint = () => {

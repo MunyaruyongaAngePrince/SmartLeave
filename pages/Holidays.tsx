@@ -82,8 +82,8 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
     date.setHours(0, 0, 0, 0);
     
     return approvedLeaves.find(leave => {
-      const start = parseLocalDate(leave.startDate);
-      const end = parseLocalDate(leave.endDate);
+      const start = new Date(leave.startDate);
+      const end = new Date(leave.endDate);
       start.setHours(0, 0, 0, 0);
       end.setHours(0, 0, 0, 0);
       return date >= start && date <= end;
@@ -164,15 +164,12 @@ const Holidays: React.FC<HolidaysProps> = ({ user, leaves, holidays }) => {
                         ${isHoliday && !isToday ? 'bg-pink-50 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 ring-2 ring-pink-100 dark:ring-pink-900/50' : ''}
                         ${leave && !isToday && !isHoliday ? 'bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 ring-2 ring-emerald-100 dark:ring-emerald-900/50' : ''}
                         ${isWeekend && !isToday && !isHoliday && !leave ? 'text-gray-300 dark:text-gray-600' : ''}
-                        ${isPast && !isToday ? 'opacity-40 grayscale-[0.5]' : ''}
+                        ${isPast && !isToday ? 'opacity-40' : ''}
                       `}
                     >
                       {day}
-                      {isHoliday && (
-                        <span className={`absolute bottom-2 w-1 h-1 rounded-full ${isToday ? 'bg-white' : 'bg-pink-500'}`}></span>
-                      )}
-                      {leave && !isHoliday && (
-                        <span className={`absolute bottom-2 w-1 h-1 rounded-full ${isToday ? 'bg-white' : 'bg-emerald-500'}`}></span>
+                      {(isHoliday || leave) && (
+                        <span className={`absolute bottom-1 w-1.5 h-1.5 rounded-full ${isToday ? 'bg-white' : isHoliday ? 'bg-pink-500' : 'bg-emerald-500'}`}></span>
                       )}
                     </div>
                   );

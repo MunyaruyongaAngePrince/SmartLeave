@@ -45,3 +45,15 @@ export const sendLeaveStatusNotification = async (email: string, fullName: strin
   const text = `Hello ${fullName},\n\nYour request for ${category} has been ${status.toLowerCase()}.\n\nPlease check your dashboard for more details.`;
   await sendEmail(email, subject, text);
 };
+
+export const sendPensionStatusNotification = async (email: string, fullName: string, retirementCategory: string, status: string) => {
+  const subject = `Pension Request ${status} - SmartLeave`;
+  const text = `Hello ${fullName},\n\nYour ${retirementCategory} request has been ${status.toLowerCase()} by HR.\n\nPlease check your Pension History for more details.`;
+  await sendEmail(email, subject, text);
+};
+
+export const sendHRAssignedLeaveNotification = async (email: string, fullName: string, category: string, startDate: string, endDate: string, reason: string) => {
+  const subject = 'Leave Assigned by HR - SmartLeave';
+  const text = `Hello ${fullName},\n\nHR has assigned you a leave:\n\nLeave Type: ${category}\nStart Date: ${startDate}\nEnd Date: ${endDate}\nReason: ${reason}\n\nThis leave has been automatically approved and added to your calendar.\n\nPlease check your dashboard for more details.`;
+  await sendEmail(email, subject, text);
+};

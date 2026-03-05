@@ -39,7 +39,8 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ holidays, approvedLeaves = 
     const start = new Date(l.startDate);
     const end = new Date(l.endDate);
     return (start.getMonth() === month && start.getFullYear() === year) || 
-           (end.getMonth() === month && end.getFullYear() === year);
+           (end.getMonth() === month && end.getFullYear() === year) ||
+           (start <= new Date(year, month, 1) && end >= new Date(year, month + 1, 0));
   });
 
   const isHoliday = (day: number) => monthHolidays.some(h => parseLocalDate(h.date).getDate() === day);
@@ -47,8 +48,8 @@ const MiniCalendar: React.FC<MiniCalendarProps> = ({ holidays, approvedLeaves = 
     const date = new Date(year, month, day);
     date.setHours(0,0,0,0);
     return monthLeaves.some(l => {
-      const s = parseLocalDate(l.startDate);
-      const e = parseLocalDate(l.endDate);
+      const s = new Date(l.startDate);
+      const e = new Date(l.endDate);
       s.setHours(0,0,0,0);
       e.setHours(0,0,0,0);
       return date >= s && date <= e;

@@ -29,6 +29,10 @@ const PensionRequestPage: React.FC<PensionRequestProps> = ({ user, pensions, set
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
 
+  // Check if user already has a pension request
+  const userPension = pensions.find(p => p.userId === user.id);
+  const hasPensionRequest = !!userPension;
+
   // Form State
   const [pensionForm, setPensionForm] = useState({
     fullName: user.fullName,
@@ -53,6 +57,90 @@ const PensionRequestPage: React.FC<PensionRequestProps> = ({ user, pensions, set
     }
     return age >= 0 ? age : null;
   };
+
+  // If user has a pension request, show status instead of form
+  if (hasPensionRequest) {
+    return (
+      <div className="p-4 md:p-8 max-w-4xl mx-auto pb-20">
+        <header className="mb-8">
+          <h1 className="text-2xl font-bold text-gray-900 dark:text-white">Pension Request Status</h1>
+          <p className="text-gray-500 dark:text-gray-400">Your pension application details and current status</p>
+        </header>
+
+        <div className="bg-white dark:bg-gray-800 rounded-3xl shadow-xl shadow-gray-100 dark:shadow-none border border-gray-100 dark:border-gray-700 p-8">
+          <div className="flex items-start justify-between mb-6">
+            <div>
+              <h3 className="text-xl font-bold text-gray-900 dark:text-white">{userPension.retirementCategory}</h3>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Applied on {userPension.appliedDate}</p>
+            </div>
+            <span className={`px-4 py-2 rounded-full text-sm font-bold uppercase flex items-center gap-2 ${
+              userPension.status === LeaveStatus.APPROVED ? 'bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400' :
+              userPension.status === LeaveStatus.REJECTED ? 'bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400' :
+              'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400'
+            }`}>
+              {userPension.status === LeaveStatus.APPROVED && <CheckCircle2 size={18} />}
+              {userPension.status === LeaveStatus.REJECTED && <Info size={18} />}
+              {userPension.status === LeaveStatus.PENDING && <Info size={18} />}
+              {userPension.status}
+            </span>
+          </div>
+
+          <div className="space-y-4 mb-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Full Name</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{userPension.fullName}</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Email</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{userPension.email}</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Department</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{userPension.department}</p>
+              </div>
+              <div>
+                <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-1">Age</label>
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">{calculateAge(userPension.dateOfBirth)} years</p>
+              </div>
+            </div>
+
+            <div className="bg-gray-50 dark:bg-gray-900/50 rounded-xl p-4">
+              <label className="block text-xs font-bold text-gray-500 dark:text-gray-400 mb-2">Reason</label>
+              <p className="text-sm text-gray-700 dark:text-gray-300">{userPension.reason}</p>
+            </div>
+          </div>
+
+          {userPension.status === LeaveStatus.PENDING && (
+            <div className="p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-100 dark:border-yellow-900/50 rounded-xl">
+              <p className="text-sm text-yellow-700 dark:text-yellow-400 flex items-center">
+                <Info size={16} className="mr-2" />
+                Your pension request is under review by HR. You will receive an email notification once a decision is made.
+              </p>
+            </div>
+          )}
+
+          {userPension.status === LeaveStatus.APPROVED && (
+            <div className="p-4 bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/50 rounded-xl">
+              <p className="text-sm text-emerald-700 dark:text-emerald-400 flex items-center">
+                <CheckCircle2 size={16} className="mr-2" />
+                Congratulations! Your pension request has been approved. HR will contact you with further details.
+              </p>
+            </div>
+          )}
+
+          {userPension.status === LeaveStatus.REJECTED && (
+            <div className="p-4 bg-red-50 dark:bg-red-900/20 border border-red-100 dark:border-red-900/50 rounded-xl">
+              <p className="text-sm text-red-700 dark:text-red-400 flex items-center">
+                <Info size={16} className="mr-2" />
+                Your pension request has been rejected. Please contact HR for more information.
+              </p>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  }
 
   const age = calculateAge(pensionForm.dateOfBirth);
 

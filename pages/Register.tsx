@@ -192,7 +192,7 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
                     value={formData.fullName}
                     onChange={(e) => setFormData({...formData, fullName: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none"
-                    placeholder="John Doe"
+                    placeholder="Ange Prince"
                   />
                 </div>
               </div>
@@ -208,7 +208,7 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
                     value={formData.email}
                     onChange={(e) => setFormData({...formData, email: e.target.value})}
                     className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none"
-                    placeholder="john@company.com"
+                    placeholder="name@gmail.com"
                   />
                 </div>
               </div>
@@ -249,7 +249,7 @@ const Register: React.FC<RegisterProps> = ({ setUsers, onAddNotification, users 
                     className="w-full pl-10 pr-4 py-2.5 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-xl focus:ring-2 focus:ring-indigo-500 dark:text-white outline-none appearance-none cursor-pointer hover:border-gray-300 dark:hover:border-gray-600 transition-colors"
                   >
                     <option value={Role.EMPLOYEE} className="dark:bg-gray-900">Employee</option>
-                    <option value={Role.HR_MANAGER} className="dark:bg-gray-900">HR Manager</option>
+                    {/* <option value={Role.HR_MANAGER} className="dark:bg-gray-900">HR Manager</option> */}
                   </select>
                   <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center pr-3 text-gray-400">
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
